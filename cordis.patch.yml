@@ -1,0 +1,152 @@
+# ZCode presets. The host row owns live settings. Every preset keeps ZCode's
+# context, tools, compaction and memory behavior, then adds the same scoped
+# skill, delegation and creator facilities as the Codex preset family.
+- insert:
+    - id: '@spectershell/dsh-harness-zcode'
+      name: '@spectershell/dsh-harness-zcode'
+
+    - id: preset-zcode-strict
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: zcode-strict
+        name: ZCode strict mode
+        description: The ZCode context and tool set without unrelated host tools.
+        order: 6
+        plugins: &zcode-strict-plugins
+          - &zcode-context
+            id: context
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              microcompaction: true
+            config:
+              - id: zcode-context
+                name: '@spectershell/dsh-harness-zcode/context'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+          - &time-context
+            id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - &zcode-tools
+            id: tools
+            name: '@spectershell/dsh-harness-zcode/tools'
+          - id: surface
+            name: '@spectershell/dsh-harness-zcode/surface'
+            config:
+              allow: [Bash, Edit, Glob, Grep, Read, Write, skill]
+          - &skill-filesystem
+            id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - &tool-skill
+            id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - &delegation
+            id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: tool-subagent-control
+                name: '@deepseek-ai/dsh-tool-subagent-control'
+                config:
+                  interrupt: false
+              - id: tool-subagent
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: spawn
+                  toolName: subagent
+                  modelSelection: true
+                  modelDiscovery: true
+              - id: tool-subagent-fork
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: fork
+                  toolName: subagent_fork
+              - id: workflow-ptc
+                name: '@deepseek-ai/dsh-workflow-ptc'
+                config:
+                  provider: spawn
+              - id: tool-workflow
+                name: '@deepseek-ai/dsh-tool-workflow'
+    - id: preset-zcode
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: zcode
+        name: ZCode mode
+        description: The ZCode tool set, plus host tools that do not overlap with it.
+        order: 5
+        plugins:
+          - *zcode-context
+          - *time-context
+          - *zcode-tools
+          - id: surface
+            name: '@spectershell/dsh-harness-zcode/surface'
+            config:
+              deny: [read, write, edit, glob, grep, bash, pwsh]
+              allow: [Bash, Edit, Glob, Grep, Read, Write]
+          - *skill-filesystem
+          - *tool-skill
+          - *delegation
+
+    - id: preset-zcode-ptc
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: zcode-ptc
+        name: ZCode PTC
+        description: The ZCode tools, reached from inside one program per call.
+        order: 7
+        plugins:
+          - *zcode-context
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+            config:
+              complete: false
+          - *zcode-tools
+          - id: surface
+            name: '@spectershell/dsh-harness-zcode/surface'
+            config:
+              deny: [read, write, edit, glob, grep, bash, pwsh]
+              allow: [Bash, Edit, Glob, Grep, Read, Write]
+          - *delegation
+          - id: tool-executor-ptc
+            name: '@deepseek-ai/dsh-tool-executor-ptc'
+
+    - id: preset-zcode-creator
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: zcode-creator
+        name: ZCode Creator
+        description: The ZCode tools, plus the tools for writing DSH plugins.
+        order: 8
+        plugins:
+          - *zcode-context
+          - *time-context
+          - *zcode-tools
+          - id: surface
+            name: '@spectershell/dsh-harness-zcode/surface'
+            config:
+              allow:
+                - Bash
+                - Edit
+                - Glob
+                - Grep
+                - Read
+                - Write
+                - cordis_inspect_list
+                - cordis_inspect_query
+                - plugin_manager
+                - plugin_market
+                - skill
+          - id: tool-cordis
+            name: '@deepseek-ai/dsh-tool-cordis'
+          - *skill-filesystem
+          - *tool-skill
+          - id: tool-plugin-manager
+            name: '@deepseek-ai/dsh-plugin-manager/tools'
+            disabled: !!js "!ctx.get('profileContext')"
+          - id: tool-plugin-market
+            name: '@deepseek-ai/dsh-plugin-market/tools'
+            disabled: !!js "!ctx.get('profileContext')"
+          - *delegation

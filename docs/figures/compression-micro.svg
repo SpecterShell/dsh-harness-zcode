@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="104" viewBox="0 0 900 104" role="img" aria-labelledby="title desc">
+  <title id="title">Microcompaction</title>
+  <desc id="desc">Upper bar: a chronological conversation with instructions, tool definitions, user and reply messages, and six tool calls with results R1 to R6, oldest to newest. Lower bar: the oldest result R1 becomes a placeholder while R2 to R6 and every message are kept. Dashed boxes mark the cleared result and the placeholder, and dashed lines link every preserved counterpart. Applies only when it saves at least 256 estimated tokens.</desc>
+  <rect width="100%" height="100%" fill="white"/>
+  <rect x="6" y="8" width="62" height="29" rx="0" fill="#CD9600"/><text x="37" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">System</text>
+  <rect x="69" y="8" width="82" height="29" rx="0" fill="#CD9600"/><text x="110" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Developer</text>
+  <rect x="152" y="8" width="50" height="29" rx="0" fill="#7CAE00"/><text x="177" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Tools</text>
+  <rect x="203" y="8" width="48" height="29" rx="0" fill="#F8766D"/><text x="227" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">User</text>
+  <rect x="252" y="8" width="40" height="29" rx="0" fill="#00A9FF"/><text x="272" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="293" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="313" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R1</text>
+  <rect x="334" y="8" width="52" height="29" rx="0" fill="#00BE67"/><text x="360" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Reply</text>
+  <rect x="387" y="8" width="48" height="29" rx="0" fill="#F8766D"/><text x="411" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">User</text>
+  <rect x="436" y="8" width="40" height="29" rx="0" fill="#00A9FF"/><text x="456" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="477" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="497" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R2</text>
+  <rect x="518" y="8" width="40" height="29" rx="0" fill="#00A9FF"/><text x="538" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="559" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="579" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R3</text>
+  <rect x="600" y="8" width="40" height="29" rx="0" fill="#00A9FF"/><text x="620" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="641" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="661" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R4</text>
+  <rect x="682" y="8" width="40" height="29" rx="0" fill="#00A9FF"/><text x="702" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="723" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="743" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R5</text>
+  <rect x="764" y="8" width="40" height="29" rx="0" fill="#00A9FF"/><text x="784" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="805" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="825" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R6</text>
+  <rect x="6" y="62" width="62" height="29" rx="0" fill="#CD9600"/><text x="37" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">System</text>
+  <rect x="69" y="62" width="82" height="29" rx="0" fill="#CD9600"/><text x="110" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Developer</text>
+  <rect x="152" y="62" width="50" height="29" rx="0" fill="#7CAE00"/><text x="177" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Tools</text>
+  <rect x="203" y="62" width="48" height="29" rx="0" fill="#F8766D"/><text x="227" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">User</text>
+  <rect x="252" y="62" width="40" height="29" rx="0" fill="#00A9FF"/><text x="272" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="293" y="62" width="40" height="29" rx="0" fill="#FF61CC"/><text x="313" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Stub</text>
+  <rect x="334" y="62" width="52" height="29" rx="0" fill="#00BE67"/><text x="360" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Reply</text>
+  <rect x="387" y="62" width="48" height="29" rx="0" fill="#F8766D"/><text x="411" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">User</text>
+  <rect x="436" y="62" width="40" height="29" rx="0" fill="#00A9FF"/><text x="456" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="477" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="497" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R2</text>
+  <rect x="518" y="62" width="40" height="29" rx="0" fill="#00A9FF"/><text x="538" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="559" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="579" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R3</text>
+  <rect x="600" y="62" width="40" height="29" rx="0" fill="#00A9FF"/><text x="620" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="641" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="661" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R4</text>
+  <rect x="682" y="62" width="40" height="29" rx="0" fill="#00A9FF"/><text x="702" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="723" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="743" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R5</text>
+  <rect x="764" y="62" width="40" height="29" rx="0" fill="#00A9FF"/><text x="784" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call</text>
+  <rect x="805" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="825" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R6</text>
+  <rect x="293" y="4" width="40" height="37" rx="2" fill="none" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <rect x="293" y="58" width="40" height="37" rx="2" fill="none" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line x1="313" y1="41" x2="313" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="37" y1="41" x2="37" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="110" y1="41" x2="110" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="177" y1="41" x2="177" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="227" y1="41" x2="227" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="272" y1="41" x2="272" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="360" y1="41" x2="360" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="411" y1="41" x2="411" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="456" y1="41" x2="456" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="497" y1="41" x2="497" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="538" y1="41" x2="538" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="579" y1="41" x2="579" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="620" y1="41" x2="620" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="661" y1="41" x2="661" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="702" y1="41" x2="702" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="743" y1="41" x2="743" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="784" y1="41" x2="784" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="825" y1="41" x2="825" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+</svg>

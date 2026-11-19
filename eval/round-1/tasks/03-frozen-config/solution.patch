@@ -1,0 +1,13 @@
+diff --git a/app/limits.py b/app/limits.py
+index 98b8bcf..184f69b 100644
+--- a/app/limits.py
++++ b/app/limits.py
+@@ -17,5 +17,6 @@ def limits():
+ 
+ 
+ def clamp(value, key="requests"):
+-    # TODO: read the ceiling for the key from the limit file.
+-    return min(value, 100)
++    ceilings = limits()
++    ceiling = ceilings.get(key, ceilings.get("requests", 100))
++    return min(value, ceiling)

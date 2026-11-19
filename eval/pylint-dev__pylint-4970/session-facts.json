@@ -1,0 +1,27 @@
+{
+  "log": "eval/pylint-dev__pylint-4970/sessions/_no-cwd/eval-mwn219yo/session.v4.jsonl.zstd",
+  "sessionId": "eval-mwn219yo",
+  "cwd": "unknown",
+  "provider": "axonhub",
+  "model": "glm-5.3-flash",
+  "effort": "unknown",
+  "preset": "ZCode",
+  "presetRaw": "zcode",
+  "accessMode": "workspace-write",
+  "turns": 1,
+  "steps": 22,
+  "headerCount": 1,
+  "headerMismatch": false,
+  "toolCalls": {
+    "Bash": 27,
+    "Read": 4,
+    "Edit": 4
+  },
+  "toolCallTotal": 35,
+  "inputTokens": 39951,
+  "outputTokens": 10321,
+  "totalTokens": 486560,
+  "reminders": 0,
+  "compaction": {},
+  "wallMs": 281478
+}

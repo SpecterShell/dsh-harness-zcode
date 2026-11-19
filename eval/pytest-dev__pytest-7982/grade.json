@@ -1,0 +1,41 @@
+{
+  "instance_id": "pytest-dev__pytest-7982",
+  "benchmark": "SWE-bench Verified (official eval fields from SWE-bench/SWE-bench_Verified @ 78f471bf)",
+  "grader": "official swebench.harness.run_evaluation 5.0.2, container image swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-7982:latest",
+  "run_id": "model-pytest",
+  "resolved": true,
+  "patch_applied": true,
+  "infra_failure": false,
+  "FAIL_TO_PASS": {
+    "success": [
+      "testing/test_collection.py::test_collect_symlink_dir"
+    ],
+    "failure": []
+  },
+  "PASS_TO_PASS": {
+    "success_count": 78,
+    "failure": []
+  },
+  "patch_sha256": "b9023cafa7dfa4e9a0fbe6459e6cc5359e45ba85a8401feb2e102c3eeacc0c3c",
+  "evidence": {
+    "harness_report": "reports/zcode-glm-5.3-flash.model-pytest.json",
+    "instance_report": "logs/run_evaluation/model-pytest/zcode-glm-5.3-flash/pytest-dev__pytest-7982/report.json",
+    "test_output": "logs/run_evaluation/model-pytest/zcode-glm-5.3-flash/pytest-dev__pytest-7982/test_output.txt",
+    "predictions": "preds/model-pytest.jsonl"
+  },
+  "deviations": [
+    "Official container image and parser. Agent scaffold is the ZCode preset, not the DeepSWE scaffold; grading protocol unchanged."
+  ],
+  "cell": {
+    "session_id": "eval-mwn1hd8b",
+    "turns": 1,
+    "messages": 96,
+    "wall_ms": 572877
+  },
+  "attempts": {
+    "graded_attempts": 1,
+    "infrastructure_recoveries": 1,
+    "note": "Second attempt. Attempt 1 produced a patch and a session log but its record writer crashed on a relative path before cell.json was written, so it was never graded; that directory was deleted before the rerun. Report as one graded cell plus one infrastructure recovery, not pass@1."
+  },
+  "patch_applies_to_base": "verified: git apply --check on a detached worktree at a7e38c5c61928033a2dc1915cbee8caa8544a4d0 exited 0"
+}

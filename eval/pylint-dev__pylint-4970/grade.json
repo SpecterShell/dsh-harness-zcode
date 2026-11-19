@@ -1,0 +1,29 @@
+{
+  "instance_id": "pylint-dev__pylint-4970",
+  "benchmark": "SWE-bench Verified (official eval fields from SWE-bench/SWE-bench_Verified @ 78f471bf)",
+  "grader": "official swebench.harness.run_evaluation 5.0.2, container image swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-4970:latest",
+  "run_id": "model-pylint",
+  "resolved": true,
+  "patch_applied": true,
+  "infra_failure": false,
+  "FAIL_TO_PASS": {
+    "success": [
+      "tests/checkers/unittest_similar.py::test_set_duplicate_lines_to_zero"
+    ],
+    "failure": []
+  },
+  "PASS_TO_PASS": {
+    "success_count": 17,
+    "failure": []
+  },
+  "patch_sha256": "44ae07884b083c3d432e4b54ea171385d1b2ebf41b37bbbdb511a68b3e0023f6",
+  "evidence": {
+    "harness_report": "reports/zcode-glm-5.3-flash.model-pylint.json",
+    "instance_report": "logs/run_evaluation/model-pylint/zcode-glm-5.3-flash/pylint-dev__pylint-4970/report.json",
+    "test_output": "logs/run_evaluation/model-pylint/zcode-glm-5.3-flash/pylint-dev__pylint-4970/test_output.txt",
+    "predictions": "preds/model-pylint.jsonl"
+  },
+  "deviations": [
+    "Official container image and parser. Agent scaffold is the ZCode preset, not the DeepSWE scaffold; grading protocol unchanged."
+  ]
+}

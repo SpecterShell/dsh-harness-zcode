@@ -1,0 +1,18 @@
+{
+  "model": {
+    "provider": "axonhub",
+    "model": "glm-5.3-flash"
+  },
+  "preset": "zcode",
+  "agentPreset": "zcode",
+  "sessionId": "eval-mwn219yo",
+  "sessionLog": "eval/pylint-dev__pylint-4970/sessions/_no-cwd/eval-mwn219yo/session.v4.jsonl.zstd",
+  "cwd": "workspaces/pylint-dev__pylint-4970",
+  "turns": 1,
+  "messages": 74,
+  "wallMs": 281481,
+  "patchBytes": 2015,
+  "host": true,
+  "steps": 22,
+  "toolCalls": 35
+}

@@ -1,0 +1,18 @@
+{
+  "model": {
+    "provider": "axonhub",
+    "model": "glm-5.3-flash"
+  },
+  "preset": "zcode",
+  "agentPreset": "zcode",
+  "sessionId": "eval-mwn1hd8b",
+  "sessionLog": "eval/pytest-dev__pytest-7982/sessions/_no-cwd/eval-mwn1hd8b/session.v4.jsonl.zstd",
+  "cwd": "workspaces/pytest-dev__pytest-7982",
+  "turns": 1,
+  "messages": 96,
+  "wallMs": 572877,
+  "patchBytes": 1659,
+  "host": true,
+  "steps": 47,
+  "toolCalls": 46
+}

@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      upload-artifact:
+        description: Upload the validated package archive
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+  DSH_VERSION: '0.2.2-rc.3'
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install dependencies
+        # Lifecycle scripts are skipped so a pull-request lockfile cannot run
+        # code during dependency installation.
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+      - name: Install the DSH host
+        run: npm install --global "@deepseek-ai/dsh@${DSH_VERSION}"
+      - name: Configure the DSH anchor
+        run: |
+          anchor="$(npm root -g)/@deepseek-ai/dsh/package.json"
+          test -f "$anchor"
+          echo "DSH_NATIVE_ANCHOR=$anchor" >> "$GITHUB_ENV"
+      - name: Install bubblewrap
+        run: sudo apt-get update && sudo apt-get install --yes bubblewrap
+      - name: Test
+        run: pnpm test
+      - name: Pack and validate the archive
+        id: pack
+        shell: bash
+        run: |
+          pnpm pack --pack-destination "$RUNNER_TEMP" > /dev/null
+          archive=$(ls "$RUNNER_TEMP"/*.tgz)
+          ARCHIVE="$archive" node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import { execFileSync } from 'node:child_process'
+
+          const archive = process.env.ARCHIVE
+          const entries = execFileSync('tar', ['-tzf', archive], { encoding: 'utf8' }).trim().split('\n')
+          const files = new Set(entries.filter((entry) => !entry.endsWith('/')))
+          for (const file of [
+            'package.json', 'lib/index.js', 'lib/index.d.ts', 'lib/client.js',
+            'lib/tools/index.js', 'lib/context/index.js', 'lib/surface.js',
+            'cordis.patch.yml', 'LICENSE', 'NOTICE', 'README.md', 'README.zh-Hans.md',
+            'locale/en.json', 'locale/zh.json',
+          ]) {
+            assert(files.has('package/' + file), 'Missing package file: ' + file)
+          }
+          for (const entry of entries) {
+            assert(!entry.split('/').includes('..'), 'Unexpected archive path: ' + entry)
+            assert(/^package\/(?:package.json|LICENSE|NOTICE|CHANGELOG.md|README(?:\.[a-zA-Z-]+)?\.md|cordis\.patch\.yml|(?:lib|locale|prompts|assets|skills)\/.*)$/.test(entry), 'Unexpected package file: ' + entry)
+          }
+          const manifest = JSON.parse(execFileSync('tar', ['-xOf', archive, 'package/package.json'], { encoding: 'utf8' }))
+          assert.equal(manifest.name, '@spectershell/dsh-harness-zcode')
+          assert.equal(manifest.repository.url, 'git+https://github.com/SpecterShell/dsh-harness-zcode.git')
+          for (const entry of [manifest.main, manifest.exports['./client'], manifest.exports['./tools'].default, manifest.exports['./context'].default, manifest.exports['./surface'].default, manifest.dsh.bundle.patch]) {
+            assert.equal(typeof entry, 'string', 'Missing package entry point')
+            assert(files.has('package/' + entry.replace(/^\.\//, '')), 'Missing entry point: ' + entry)
+          }
+          if (process.env.GITHUB_REF_TYPE === 'tag') {
+            assert.equal(process.env.GITHUB_REF_NAME, 'v' + manifest.version, 'Tag must match the package version')
+          }
+          console.log(`Validated ${archive} (${files.size} files)`)
+          NODE
+      - name: Upload the package artifact
+        if: ${{ inputs.upload-artifact }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: "dsh-harness-zcode-${{ github.sha }}"
+          path: ${{ runner.temp }}/*.tgz
+          if-no-files-found: error
+          retention-days: 14
+
+  test-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install the DSH host
+        run: npm install --global "@deepseek-ai/dsh@${DSH_VERSION}"
+      - name: Test
+        run: |
+          anchor="$(npm root -g)/@deepseek-ai/dsh/package.json"
+          test -f "$anchor"
+          DSH_NATIVE_ANCHOR="$anchor" pnpm test
+
+  links:
+    name: Markdown links
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: node .github/scripts/check-markdown-links.mjs

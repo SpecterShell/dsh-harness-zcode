@@ -1,0 +1,30 @@
+diff --git a/src/flask/blueprints.py b/src/flask/blueprints.py
+index eb50585d..1f2a0ced 100644
+--- a/src/flask/blueprints.py
++++ b/src/flask/blueprints.py
+@@ -193,6 +193,9 @@ class Blueprint(Scaffold):
+         if "." in name:
+             raise ValueError("'name' may not contain a dot '.' character.")
+ 
++        if not name:
++            raise ValueError("'name' may not be empty.")
++
+         self.name = name
+         self.url_prefix = url_prefix
+         self.subdomain = subdomain
+diff --git a/tests/test_blueprints.py b/tests/test_blueprints.py
+index d46b769b..961ab306 100644
+--- a/tests/test_blueprints.py
++++ b/tests/test_blueprints.py
+@@ -1010,6 +1010,11 @@ def test_unique_blueprint_names(app, client) -> None:
+     app.register_blueprint(bp2, name="alt")  # different bp, different name, ok
+ 
+ 
++def test_empty_name(app) -> None:
++    with pytest.raises(ValueError):
++        flask.Blueprint("", __name__)
++
++
+ def test_self_registration(app, client) -> None:
+     bp = flask.Blueprint("bp", __name__)
+     with pytest.raises(ValueError):

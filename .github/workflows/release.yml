@@ -1,0 +1,115 @@
+name: Release
+
+# Push a tag of the form v<package.json version> to release.
+# npm publishing uses trusted publishing (OIDC) inside the protected `npm`
+# environment, and packages are staged for manual promotion rather than going
+# live immediately. Provenance attestations live in the repository's
+# attestation store; the release itself carries only the tarball.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  check-and-package:
+    uses: ./.github/workflows/ci.yml
+    with:
+      upload-artifact: true
+
+  attest:
+    name: Attest the package
+    needs: check-and-package
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: "dsh-harness-zcode-${{ github.sha }}"
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ./*.tgz
+
+  publish:
+    name: Stage on npm
+    needs: check-and-package
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The npm trusted publisher is configured for this environment, and the
+    # environment requires approval before a release can run.
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/@spectershell/dsh-harness-zcode
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: "dsh-harness-zcode-${{ github.sha }}"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing (OIDC) requires npm 11.5.1 or later. The package
+      # must be linked to this repository and workflow on npmjs.com first.
+      - name: Update npm for trusted publishing
+        run: npm install --global npm@12.2.3
+      # Staged publishing waits for manual promotion on npmjs.com instead of
+      # going live. E409 keeps a rerun green when the version is already staged.
+      - name: Stage the package with provenance
+        run: |
+          set +e
+          output=$(npm stage publish ./*.tgz --provenance --access public 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ $status -ne 0 ] && ! printf '%s' "$output" | grep -q "E409"; then
+            exit $status
+          fi
+          if [ $status -ne 0 ]; then
+            echo "::notice::the version is already staged on npm; continuing"
+          fi
+
+  release:
+    name: Create the GitHub Release
+    needs: [check-and-package, attest, publish]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # gh release create shells out to git, so the job needs a checkout.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: "dsh-harness-zcode-${{ github.sha }}"
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          archive=$(ls ./*.tgz)
+          version="${GITHUB_REF_NAME#v}"
+          mv "$archive" "dsh-harness-zcode-${version}.tgz"
+          extra=(--verify-tag --generate-notes)
+          if [[ "$version" == *-* ]]; then
+            extra+=(--prerelease)
+          fi
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "dsh-harness-zcode-${version}.tgz" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "dsh-harness-zcode-${version}.tgz" "${extra[@]}"
+          fi

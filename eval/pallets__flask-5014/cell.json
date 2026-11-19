@@ -1,0 +1,18 @@
+{
+  "model": {
+    "provider": "axonhub",
+    "model": "glm-5.3-flash"
+  },
+  "preset": "zcode",
+  "agentPreset": "zcode",
+  "sessionId": "session-1",
+  "sessionLog": "eval/pallets__flask-5014/sessions/_no-cwd/session-1/session.v4.jsonl.zstd",
+  "cwd": "workspaces/pallets__flask-5014",
+  "turns": 1,
+  "wallMs": 255444,
+  "patchBytes": 1053,
+  "host": true,
+  "steps": 39,
+  "toolCalls": 42,
+  "messages": 84
+}

@@ -1,0 +1,57 @@
+diff --git a/ops/report.py b/ops/report.py
+index 85e7ea8..e8f0ac7 100644
+--- a/ops/report.py
++++ b/ops/report.py
+@@ -13,24 +13,26 @@ def parse(line):
+ 
+ 
+ def summarize(lines):
+-    by_service = defaultdict(int)
+-    errors = 0
+-    retried = 0
++    attempts = defaultdict(int)
++    first_service = {}
++    final_level = {}
+     for line in lines:
+         fields = parse(line)
+         level = fields.get("level")
+         if level == "warn":
+             continue
+-        attempt = int(fields.get("attempt", "1"))
+-        if attempt > 1:
+-            retried += 1
++        job = fields.get("job")
++        attempts[job] += 1
++        first_service.setdefault(job, fields.get("service", "unknown"))
++        final_level[job] = level
++    by_service = defaultdict(int)
++    for job, level in final_level.items():
+         if level == "error":
+-            errors += 1
+-            by_service[fields.get("service", "unknown")] += 1
++            by_service[first_service[job]] += 1
+     return {
+         "by_service": dict(sorted(by_service.items())),
+-        "retried_jobs": retried,
+-        "total_failures": errors,
++        "retried_jobs": sum(1 for count in attempts.values() if count > 1),
++        "total_failures": sum(1 for level in final_level.values() if level == "error"),
+     }
+ 
+ 
+diff --git a/out/report.json b/out/report.json
+new file mode 100644
+index 0000000..0c372d8
+--- /dev/null
++++ b/out/report.json
+@@ -0,0 +1,10 @@
++{
++  "by_service": {
++    "api": 720,
++    "checkout": 661,
++    "search": 715,
++    "worker": 715
++  },
++  "retried_jobs": 5900,
++  "total_failures": 2811
++}

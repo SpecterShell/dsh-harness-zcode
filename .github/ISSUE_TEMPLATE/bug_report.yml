@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in the preset or its tooling behaves incorrectly
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Search existing issues first, and keep secrets out of logs and transcripts.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did the preset do instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Configure ...
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Versions and platform details.
+      placeholder: |
+        OS:
+        Node:
+        pnpm:
+        DSH host:
+        @spectershell/dsh-harness-zcode:
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or transcripts
+      description: Redact tokens, private paths and personal data.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and found no duplicate.
+          required: true
+        - label: This is not a security vulnerability; I will use the private advisory link for those.
+          required: true

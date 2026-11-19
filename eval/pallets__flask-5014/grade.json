@@ -1,0 +1,29 @@
+{
+  "instance_id": "pallets__flask-5014",
+  "benchmark": "SWE-bench Verified (princeton-nlp/SWE-bench_Verified @ c104f840; official eval fields from SWE-bench/SWE-bench_Verified @ 78f471bf)",
+  "grader": "official swebench.harness.run_evaluation 5.0.2, container image swebench/sweb.eval.x86_64.pallets_1776_flask-5014:latest",
+  "run_id": "model-flask",
+  "resolved": true,
+  "patch_applied": true,
+  "infra_failure": false,
+  "FAIL_TO_PASS": {
+    "success": [
+      "tests/test_blueprints.py::test_empty_name_not_allowed"
+    ],
+    "failure": []
+  },
+  "PASS_TO_PASS": {
+    "success_count": 59,
+    "failure": []
+  },
+  "patch_sha256": "934d25308bd76938c023c950c89f229b63ac553b426a4ad61db95788b434940b",
+  "evidence": {
+    "harness_report": "reports/zcode-glm-5.3-flash.model-flask.json",
+    "instance_report": "logs/run_evaluation/model-flask/zcode-glm-5.3-flash/pallets__flask-5014/report.json",
+    "test_output": "logs/run_evaluation/model-flask/zcode-glm-5.3-flash/pallets__flask-5014/test_output.txt",
+    "predictions": "preds/model-flask.jsonl"
+  },
+  "deviations": [
+    "Test execution is the official container image and official log parser. The agent scaffold is the ZCode preset, not the DeepSWE scaffold; the grading protocol is unchanged."
+  ]
+}

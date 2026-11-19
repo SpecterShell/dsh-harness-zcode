@@ -1,0 +1,26 @@
+diff --git a/billing/CHANGELOG.md b/billing/CHANGELOG.md
+index 8d5ef79..b656664 100644
+--- a/billing/CHANGELOG.md
++++ b/billing/CHANGELOG.md
+@@ -2,6 +2,8 @@
+ 
+ ## Unreleased
+ 
++- BIL-431 Round the invoice total once, after summing the lines.
++
+ ## 0.3.0
+ 
+ - BIL-402 Drop the legacy `totals_v1` helper.
+diff --git a/billing/rounding.py b/billing/rounding.py
+index 6a0e2f4..87f5f13 100644
+--- a/billing/rounding.py
++++ b/billing/rounding.py
+@@ -9,6 +9,5 @@ def invoice_total(pairs):
+     """Add (unit_price, quantity) pairs and round the result to cents."""
+     total = Decimal("0")
+     for unit_price, quantity in pairs:
+-        line = Decimal(unit_price) * Decimal(quantity)
+-        total += line.quantize(CENT, rounding=ROUND_HALF_UP)
+-    return total
++        total += Decimal(unit_price) * Decimal(quantity)
++    return total.quantize(CENT, rounding=ROUND_HALF_UP)

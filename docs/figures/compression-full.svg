@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="104" viewBox="0 0 900 104" role="img" aria-labelledby="title desc">
+  <title id="title">Full compaction</title>
+  <desc id="desc">Upper bar: a chronological conversation with instructions, tool definitions, a user message and a reply, then six read calls A to F and their results R1 to R6, oldest to newest. Lower bar: the conversation becomes one summary checkpoint and the five newest files F, E, D, C and B are restored; the oldest file A is not. Dashed boxes mark the summarized range and the summary, and dashed lines link the preserved instructions and tool definitions.</desc>
+  <rect width="100%" height="100%" fill="white"/>
+  <rect x="6" y="8" width="62" height="29" rx="0" fill="#CD9600"/><text x="37" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">System</text>
+  <rect x="69" y="8" width="82" height="29" rx="0" fill="#CD9600"/><text x="110" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Developer</text>
+  <rect x="152" y="8" width="50" height="29" rx="0" fill="#7CAE00"/><text x="177" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Tools</text>
+  <rect x="203" y="8" width="48" height="29" rx="0" fill="#F8766D"/><text x="227" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">User</text>
+  <rect x="252" y="8" width="52" height="29" rx="0" fill="#00BE67"/><text x="278" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Reply</text>
+  <rect x="305" y="8" width="46" height="29" rx="0" fill="#00A9FF"/><text x="328" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call A</text>
+  <rect x="352" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="372" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R1</text>
+  <rect x="393" y="8" width="46" height="29" rx="0" fill="#00A9FF"/><text x="416" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call B</text>
+  <rect x="440" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="460" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R2</text>
+  <rect x="481" y="8" width="46" height="29" rx="0" fill="#00A9FF"/><text x="504" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call C</text>
+  <rect x="528" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="548" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R3</text>
+  <rect x="569" y="8" width="46" height="29" rx="0" fill="#00A9FF"/><text x="592" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call D</text>
+  <rect x="616" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="636" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R4</text>
+  <rect x="657" y="8" width="46" height="29" rx="0" fill="#00A9FF"/><text x="680" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call E</text>
+  <rect x="704" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="724" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R5</text>
+  <rect x="745" y="8" width="46" height="29" rx="0" fill="#00A9FF"/><text x="768" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Call F</text>
+  <rect x="792" y="8" width="40" height="29" rx="0" fill="#C77CFF"/><text x="812" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">R6</text>
+  <rect x="834" y="8" width="52" height="29" rx="0" fill="#00BE67"/><text x="860" y="27.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Reply</text>
+  <rect x="6" y="62" width="62" height="29" rx="0" fill="#CD9600"/><text x="37" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">System</text>
+  <rect x="69" y="62" width="82" height="29" rx="0" fill="#CD9600"/><text x="110" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Developer</text>
+  <rect x="152" y="62" width="50" height="29" rx="0" fill="#7CAE00"/><text x="177" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Tools</text>
+  <rect x="203" y="62" width="110" height="29" rx="0" fill="#00BFC4"/><text x="258" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">Summary</text>
+  <rect x="315" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="335" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">F</text>
+  <rect x="356" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="376" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">E</text>
+  <rect x="397" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="417" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">D</text>
+  <rect x="438" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="458" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">C</text>
+  <rect x="479" y="62" width="40" height="29" rx="0" fill="#C77CFF"/><text x="499" y="81.5" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#172033">B</text>
+  <rect x="202" y="4" width="685" height="37" rx="2" fill="none" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <rect x="202" y="58" width="112" height="37" rx="2" fill="none" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line x1="544.5" y1="41" x2="262" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="37" y1="41" x2="37" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="110" y1="41" x2="110" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="177" y1="41" x2="177" y2="58" stroke="#7a7a7a" stroke-width="1.5" stroke-dasharray="4 4"/>
+</svg>

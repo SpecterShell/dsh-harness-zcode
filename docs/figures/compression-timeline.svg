@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="448" viewBox="0 0 760 448" role="img" aria-labelledby="title desc">
+  <title id="title">Estimated active context over session steps</title>
+  <desc id="desc">A line chart of estimated active context in tokens over session steps. The context grows, then drops sharply at steps 12 and 22 when it reaches about 188000 and 182000 tokens, above the full compaction threshold of 180000, then grows again. A callout at step 9 marks a one-request microcompaction projection: enabled by an explicit host call at 146000 tokens, above the 140000 threshold, saving at least 256 estimated tokens, for the next request only.</desc>
+  <rect width="100%" height="100%" fill="white"/>
+  <g transform="translate(0 108)">
+  <line x1="64" y1="252" x2="742" y2="252" stroke="#c9cfd8" stroke-width="1"/>
+  <line x1="64" y1="193.66666666666669" x2="742" y2="193.66666666666669" stroke="#c9cfd8" stroke-width="1"/>
+  <line x1="64" y1="135.33333333333334" x2="742" y2="135.33333333333334" stroke="#c9cfd8" stroke-width="1"/>
+  <line x1="64" y1="77" x2="742" y2="77" stroke="#c9cfd8" stroke-width="1"/>
+  <line x1="64" y1="18.666666666666686" x2="742" y2="18.666666666666686" stroke="#c9cfd8" stroke-width="1"/>
+  <line x1="64" y1="42" x2="742" y2="42" stroke="#d65f56" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <line x1="64" y1="88.66666666666666" x2="742" y2="88.66666666666666" stroke="#009e54" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <line x1="64" y1="252" x2="742" y2="252" stroke="#172033" stroke-width="1.5"/>
+  <line x1="64" y1="14" x2="64" y2="252" stroke="#172033" stroke-width="1.5"/>
+  <text x="64" y="270" text-anchor="middle" font-size="12" fill="#172033">0</text>
+  <text x="122.95652173913044" y="270" text-anchor="middle" font-size="12" fill="#172033">2</text>
+  <text x="181.91304347826087" y="270" text-anchor="middle" font-size="12" fill="#172033">4</text>
+  <text x="240.8695652173913" y="270" text-anchor="middle" font-size="12" fill="#172033">6</text>
+  <text x="299.82608695652175" y="270" text-anchor="middle" font-size="12" fill="#172033">8</text>
+  <text x="358.7826086956522" y="270" text-anchor="middle" font-size="12" fill="#172033">10</text>
+  <text x="417.7391304347826" y="270" text-anchor="middle" font-size="12" fill="#172033">12</text>
+  <text x="476.69565217391306" y="270" text-anchor="middle" font-size="12" fill="#172033">14</text>
+  <text x="535.6521739130435" y="270" text-anchor="middle" font-size="12" fill="#172033">16</text>
+  <text x="594.608695652174" y="270" text-anchor="middle" font-size="12" fill="#172033">18</text>
+  <text x="653.5652173913044" y="270" text-anchor="middle" font-size="12" fill="#172033">20</text>
+  <text x="712.5217391304348" y="270" text-anchor="middle" font-size="12" fill="#172033">22</text>
+  <text x="56" y="256" text-anchor="end" font-size="12" fill="#172033">0</text>
+  <text x="56" y="197.66666666666669" text-anchor="end" font-size="12" fill="#172033">50k</text>
+  <text x="56" y="139.33333333333334" text-anchor="end" font-size="12" fill="#172033">100k</text>
+  <text x="56" y="81" text-anchor="end" font-size="12" fill="#172033">150k</text>
+  <text x="56" y="22.666666666666686" text-anchor="end" font-size="12" fill="#172033">200k</text>
+  <text x="403" y="288" text-anchor="middle" font-size="13" fill="#172033">session step</text>
+  <text x="16" y="133" text-anchor="middle" font-size="13" fill="#172033" transform="rotate(-90 16 133)">estimated active context (tokens)</text>
+  <path d="M64.0 228.7 L93.5 212.3 L123.0 196.0 L152.4 179.7 L181.9 163.3 L211.4 147.0 L240.9 130.7 L270.3 114.3 L299.8 98.0 L329.3 81.7 L358.8 65.3 L417.7 32.7 L417.7 203.0" fill="none" stroke="#0087d6" stroke-width="2.5"/>
+  <path d="M417.7 203.0 L417.7 203.0" fill="none" stroke="#0087d6" stroke-width="2.5"/>
+  <path d="M417.7 203.0 L447.2 186.7 L476.7 170.3 L506.2 154.0 L535.7 137.7 L565.1 121.3 L594.6 105.0 L624.1 88.7 L653.6 72.3 L712.5 39.7 L712.5 203.0" fill="none" stroke="#0087d6" stroke-width="2.5"/>
+  <path d="M712.5 203.0 L712.5 203.0" fill="none" stroke="#0087d6" stroke-width="2.5"/>
+  <path d="M712.5 203.0 L742.0 186.7" fill="none" stroke="#0087d6" stroke-width="2.5"/>
+  <circle cx="417.7391304347826" cy="32.666666666666686" r="4.5" fill="#CD9600"/><line x1="417.7391304347826" y1="32.666666666666686" x2="417.7391304347826" y2="203" stroke="#CD9600" stroke-width="2" stroke-dasharray="4 3"/>
+  <circle cx="712.5217391304348" cy="39.66666666666666" r="4.5" fill="#CD9600"/><line x1="712.5217391304348" y1="39.66666666666666" x2="712.5217391304348" y2="203" stroke="#CD9600" stroke-width="2" stroke-dasharray="4 3"/>
+  <circle cx="329.304347826087" cy="81.66666666666666" r="4.5" fill="#a95ae0"/><line x1="329.304347826087" y1="81.66666666666666" x2="329.304347826087" y2="112" stroke="#a95ae0" stroke-width="2" stroke-dasharray="3 3"/><circle cx="329.304347826087" cy="112" r="4.5" fill="none" stroke="#a95ae0" stroke-width="2"/><line x1="329.304347826087" y1="112" x2="329.304347826087" y2="81.66666666666666" stroke="#a95ae0" stroke-width="2" stroke-dasharray="3 3"/>
+  <g transform="translate(64 306)"><line x1="0" y1="-4" x2="22" y2="-4" stroke="#0087d6" stroke-width="2.5"/><text x="28" y="0" font-size="12" fill="#172033">active context</text></g>
+  <g transform="translate(231 306)"><circle cx="11" cy="-4" r="4.5" fill="#CD9600"/><text x="28" y="0" font-size="12" fill="#172033">full compaction</text></g>
+  <g transform="translate(402 306)"><circle cx="11" cy="-4" r="5" fill="none" stroke="#a95ae0" stroke-width="2"/><text x="28" y="0" font-size="12" fill="#172033">micro projection (one request)</text></g>
+  <g transform="translate(64 326)"><line x1="0" y1="-4" x2="22" y2="-4" stroke="#d65f56" stroke-width="1.5" stroke-dasharray="6 4"/><text x="28" y="0" font-size="12" fill="#172033">full threshold 0.9 (180k)</text></g>
+  <g transform="translate(304 326)"><line x1="0" y1="-4" x2="22" y2="-4" stroke="#009e54" stroke-width="1.5" stroke-dasharray="6 4"/><text x="28" y="0" font-size="12" fill="#172033">micro threshold 0.7 (140k)</text></g>
+  </g>
+  <path d="M274 94 L329.3 184.7" stroke="#a95ae0" fill="none"/>
+  <rect x="5" y="5" width="281" height="89" rx="4" stroke="#a95ae0" fill="white"/>
+  <text x="14" y="26" font-family="system-ui,sans-serif" font-size="12" font-weight="650" fill="#172033">Step 9 · Microcompaction</text>
+  <text x="14" y="45" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">Enabled and called by the host</text>
+  <text x="14" y="64" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">146k ≥ 140k tokens (70%)</text>
+  <text x="14" y="83" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">Saves ≥ 256 tokens on the next request</text>
+  <path d="M417.7 94 L417.7 135.7" stroke="#a16b00" fill="none"/>
+  <rect x="294" y="5" width="226" height="89" rx="4" stroke="#a16b00" fill="white"/>
+  <text x="303" y="26" font-family="system-ui,sans-serif" font-size="12" font-weight="650" fill="#172033">Step 12 · Full compaction</text>
+  <text x="303" y="45" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">Enabled, checked before the step</text>
+  <text x="303" y="64" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">188k ≥ 180k tokens (90%)</text>
+  <path d="M712.5 94 L712.5 142.7" stroke="#a16b00" fill="none"/>
+  <rect x="529" y="5" width="226" height="89" rx="4" stroke="#a16b00" fill="white"/>
+  <text x="538" y="26" font-family="system-ui,sans-serif" font-size="12" font-weight="650" fill="#172033">Step 22 · Full compaction</text>
+  <text x="538" y="45" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">Enabled, checked before the step</text>
+  <text x="538" y="64" font-family="system-ui,sans-serif" font-size="12" font-weight="400" fill="#172033">182k ≥ 180k tokens (90%)</text>
+</svg>

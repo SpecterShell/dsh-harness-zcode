@@ -1,0 +1,26 @@
+This product includes system prompt text copied verbatim from ZCode
+(https://github.com/zai-org/ZCode), commit
+fec975905a2abd4c07e35c40d51fa097a2258ec9 (sync v3.18.2). That code is
+licensed under the Apache License, Version 2.0.
+
+The persona in src/context/index.ts copies three blocks from
+apps/zcode-cli/packages/core/src/context/sections/identity.ts in that commit:
+
+  src/context/index.ts (the PERSONA constant)
+    identity.ts DEFAULT_AGENT_IDENTITY (the stable agent intro)
+    identity.ts SECURITY_NOTICE (the security notice)
+    identity.ts buildHarnessBlock (the "# Harness" block, in its
+      mid-conversation `<system-reminder>` variant)
+
+The remaining persona and prompt text in this package is original work.
+
+The behavior this preset reproduces was otherwise designed by reading the
+ZCode source. Reading informed the design; beyond the persona blocks above,
+no ZCode source code, prompt text or documentation is copied or ported. The
+upstream source references are in the tool, compression and memory guides.
+
+This package is written against the DeepSeek Harness plugin API. The API type
+declarations used at build time come from the installed DeepSeek Harness
+packages and are not redistributed here.
+
+The Apache License 2.0 text is in LICENSE.

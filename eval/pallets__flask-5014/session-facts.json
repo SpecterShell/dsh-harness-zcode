@@ -1,0 +1,27 @@
+{
+  "log": "eval/pallets__flask-5014/sessions/_no-cwd/session-1/session.v4.jsonl.zstd",
+  "sessionId": "session-1",
+  "cwd": "unknown",
+  "provider": "axonhub",
+  "model": "glm-5.3-flash",
+  "effort": "unknown",
+  "preset": "ZCode",
+  "presetRaw": "zcode",
+  "accessMode": "workspace-write",
+  "turns": 1,
+  "steps": 39,
+  "headerCount": 1,
+  "headerMismatch": false,
+  "toolCalls": {
+    "Bash": 35,
+    "Read": 4,
+    "Edit": 3
+  },
+  "toolCallTotal": 42,
+  "inputTokens": 42181,
+  "outputTokens": 5428,
+  "totalTokens": 273465,
+  "reminders": 0,
+  "compaction": {},
+  "wallMs": 255442
+}

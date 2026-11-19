@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest a behavior, tool or integration for the ZCode-style presets
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the docs and existing issues first. Features that require changing DSH itself belong upstream.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and where do the current presets get in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior you want, including tool names or config if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing workarounds or native DSH plugins you have tried.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links to upstream ZCode behavior, transcripts or related issues.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and found no duplicate.
+          required: true
+        - label: This request does not depend on a private or unavailable DSH API.
+          required: true
