@@ -9,11 +9,21 @@
 import type { Context } from "@deepseek-ai/cordis";
 import type {} from "@deepseek-ai/dsh-working-directory";
 import { defineTool, ToolArgsError, ToolContextUnavailableError } from "@deepseek-ai/dsh-tools";
-import { FsError, type FsTarget } from "@deepseek-ai/dsh-fs";
+import { FsError, type FsTarget, type FsVersion, type FsWriteIntent } from "@deepseek-ai/dsh-fs";
 import { basename, dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { performance } from "node:perf_hooks";
+import {
+  computeHunkDiffs,
+  editPresentationMeta,
+  globPresentationMeta,
+  grepPresentationMeta,
+  readPresentationMeta,
+  writePresentationMeta,
+} from "./presentation.ts";
 import { ZCodeFileTouches } from "./touches.ts";
+import type { ZCodeObservationPolicy } from "../observation.ts";
 
+export * from "./presentation.ts";
 export * from "./touches.ts";
 
 export const name = "zcode-tools";
@@ -135,6 +145,43 @@ export async function readZCodeFileSnapshot(
  */
 function settings(ctx: Context): ZCodeSettings | undefined {
   return ctx.get("zcodeSettings" as never) as ZCodeSettings | undefined;
+}
+
+/** Return the preset-private native observation policy when composed. */
+function observationPolicy(ctx: Context): ZCodeObservationPolicy | undefined {
+  return ctx.get("zcodeObservationPolicy" as never) as ZCodeObservationPolicy | undefined;
+}
+
+/** Publish one authoritative observation to host policy and ZCode fallback. */
+function observe(
+  ctx: Context,
+  target: FsTarget,
+  observation: { kind: "absent" } | { kind: "present"; version: any },
+  actor: object,
+): void {
+  ctx.emit("fs/observed", target, observation, actor);
+  observationPolicy(ctx)?.observe(target, observation, actor);
+}
+
+/** Resolve the ZCode create-or-replace guard when no host policy decided. */
+async function zcodeWriteIntent(ctx: Context, target: FsTarget, actor: object): Promise<FsWriteIntent> {
+  const fallback = () => ({ kind: "createIfAbsent" } as const);
+  return await observationPolicy(ctx)?.writeIntent(target, actor, fallback) ?? fallback();
+}
+
+/** Resolve the ZCode edit version when no host policy decided. */
+async function zcodeEditIntent(
+  ctx: Context,
+  target: FsTarget,
+  actor: object,
+): Promise<{ version: FsVersion }> {
+  const fallback = (): { version: FsVersion } => {
+    throw new FsError(
+      `edit requires reading "${target.displayPath}" first; no observation policy authorized this mutation`,
+      "FS_NOT_OBSERVED",
+    );
+  };
+  return await observationPolicy(ctx)?.editIntent(target, actor, fallback) ?? fallback();
 }
 
 /**
@@ -376,6 +423,7 @@ export function apply(ctx: Context): void {
         },
       },
       render: (_args, value) => [{ type: "text", text: value.content }],
+      presentationMeta: (_args, value) => readPresentationMeta(value),
     },
     isConcurrencySafe: () => true,
     /**
@@ -398,7 +446,7 @@ export function apply(ctx: Context): void {
       } catch (error) {
         const missing = await ctx.fs.resolve(args.file_path, { cwd: requestedCwd, signal: exec.signal });
         if (await ctx.fs.stat(missing, exec.signal) === undefined) {
-          ctx.emit("fs/observed", missing, { kind: "absent" }, exec);
+          observe(ctx, missing, { kind: "absent" }, exec);
         }
         throw error;
       }
@@ -409,7 +457,7 @@ export function apply(ctx: Context): void {
       const complete = offset === 0 && !truncated;
       noteTouch(touches, exec, snapshot.canonicalPath, args.file_path, "read", requestedCwd);
       if (complete) {
-        ctx.emit("fs/observed", snapshot.target, { kind: "present", version: snapshot.version }, exec);
+        observe(ctx, snapshot.target, { kind: "present", version: snapshot.version }, exec);
       }
       return {
         type: "text" as const,
@@ -449,6 +497,7 @@ export function apply(ctx: Context): void {
           ? `File created successfully at: ${value.filePath} (file state is current in your context — no need to Read it back)`
           : `The file ${value.filePath} has been updated successfully. (file state is current in your context — no need to Read it back)`,
       }],
+      presentationMeta: (_args, value) => writePresentationMeta(value),
     },
     /**
      * Writes text using the filesystem's write-intent policy.
@@ -464,7 +513,7 @@ export function apply(ctx: Context): void {
         "fs/write-intent",
         resolved.target,
         exec,
-        () => ({ kind: "createIfAbsent" } as const),
+        () => zcodeWriteIntent(ctx, resolved.target, exec),
       );
       const outcome = await ctx.fs.writeText(
         resolved.target,
@@ -474,7 +523,7 @@ export function apply(ctx: Context): void {
         sandboxPolicy(ctx, exec),
       );
       noteTouch(touches, exec, resolved.canonicalPath, args.file_path, "write", resolved.requestedCwd);
-      ctx.emit("fs/observed", resolved.target, { kind: "present", version: outcome.version }, exec);
+      observe(ctx, resolved.target, { kind: "present", version: outcome.version }, exec);
       return {
         type: outcome.operation,
         filePath: resolved.canonicalPath,
@@ -506,6 +555,19 @@ export function apply(ctx: Context): void {
           oldString: { type: "string", required: true },
           newString: { type: "string", required: true },
           originalFile: { type: "string", required: true },
+          diffs: {
+            type: "array",
+            required: true,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                path: { type: "string", required: true },
+                oldText: { required: true, oneOf: [{ type: "string" }, { type: "null" }] },
+                newText: { type: "string", required: true },
+              },
+            },
+          },
           replaceAll: { type: "boolean", required: true },
         },
       },
@@ -515,6 +577,7 @@ export function apply(ctx: Context): void {
           ? `The file ${value.filePath} has been updated. All occurrences were successfully replaced.`
           : `The file ${value.filePath} has been updated successfully.`,
       }],
+      presentationMeta: (_args, value) => editPresentationMeta(value),
     },
     /**
      * Applies exact text replacement after edit-intent authorization.
@@ -531,12 +594,7 @@ export function apply(ctx: Context): void {
         "fs/edit-intent",
         resolved.target,
         exec,
-        () => {
-          throw new FsError(
-            `edit requires reading "${resolved.target.displayPath}" first; no observation policy authorized this mutation`,
-            "FS_NOT_OBSERVED",
-          );
-        },
+        () => zcodeEditIntent(ctx, resolved.target, exec),
       );
       const outcome = await ctx.fs.editText(
         resolved.target,
@@ -550,12 +608,13 @@ export function apply(ctx: Context): void {
         sandboxPolicy(ctx, exec),
       );
       noteTouch(touches, exec, resolved.canonicalPath, args.file_path, "edit", resolved.requestedCwd);
-      ctx.emit("fs/observed", resolved.target, { kind: "present", version: outcome.version }, exec);
+      observe(ctx, resolved.target, { kind: "present", version: outcome.version }, exec);
       return {
         filePath: resolved.canonicalPath,
         oldString: args.old_string,
         newString: args.new_string,
         originalFile: outcome.before,
+        diffs: computeHunkDiffs(resolved.canonicalPath, outcome.before, outcome.after),
         replaceAll: args.replace_all ?? false,
       };
     },
@@ -580,6 +639,7 @@ export function apply(ctx: Context): void {
           status: { type: "string", required: true, enum: ["completed", "failed", "cancelled", "spawn_error"] },
           exitCode: { oneOf: [{ type: "integer" }, { type: "null" }] },
           signal: { oneOf: [{ type: "string" }, { type: "null" }] },
+          cwd: { type: "string", required: true },
           interrupted: { type: "boolean", required: true },
           stdoutTruncated: { type: "boolean" },
           stderrTruncated: { type: "boolean" },
@@ -589,6 +649,13 @@ export function apply(ctx: Context): void {
         type: "text",
         text: [value.stdout, value.stderr, `[exit code: ${value.exitCode ?? "signal"}]`].filter(Boolean).join("\n"),
       }],
+      presentationMeta: (_args, value) => ({
+        cwd: value.cwd,
+        status: value.status,
+        exitCode: value.exitCode ?? null,
+        signal: value.signal ?? null,
+        interrupted: value.interrupted,
+      }),
     },
     /**
      * Executes one Bash command while persisting only its final directory.
@@ -636,6 +703,7 @@ eval -- ${shellQuote(args.command)}`;
             : "failed" as const,
         exitCode: outcome.exitCode,
         signal: outcome.signal,
+        cwd: workdir,
         interrupted: outcome.aborted || outcome.timedOut,
         ...(outcome.stdout.truncated || stdoutResult.truncated ? { stdoutTruncated: true } : {}),
         ...(outcome.stderr.truncated || stderrResult.truncated ? { stderrTruncated: true } : {}),
@@ -691,11 +759,13 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
         properties: {
           durationMs: { type: "number", required: true },
           numFiles: { type: "integer", required: true },
+          totalFiles: { type: "integer", required: true },
           filenames: { type: "array", required: true, items: { type: "string" } },
           truncated: { type: "boolean", required: true },
         },
       },
       render: (_args, value) => [{ type: "text", text: value.filenames.length ? value.filenames.join("\n") : "No files found" }],
+      presentationMeta: (_args, value) => globPresentationMeta(value),
     },
     isConcurrencySafe: () => true,
     /** Returns at most 100 matches while preserving whether more were found. */
@@ -714,7 +784,13 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
       const all = outcome.stdout.text.split(/\r?\n/u).filter(Boolean);
       const filenames = all.slice(0, 100).map((path) => displayPath(path, workdir));
       for (const path of all.slice(0, 100)) noteTouch(touches, exec, resolve(path), displayPath(path, workdir), "glob");
-      return { durationMs: Math.round(performance.now() - started), numFiles: filenames.length, filenames, truncated: all.length > 100 };
+      return {
+        durationMs: Math.round(performance.now() - started),
+        numFiles: filenames.length,
+        totalFiles: all.length,
+        filenames,
+        truncated: outcome.stdout.truncated || all.length > 100,
+      };
     },
   }), { when: () => searchMode(ctx) === "tools" });
 
@@ -740,6 +816,28 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
           numFiles: { type: "integer", required: true },
           filenames: { type: "array", required: true, items: { type: "string" } },
           content: { type: "string" },
+          cardFiles: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                path: { type: "string", required: true },
+                matches: {
+                  type: "array",
+                  required: true,
+                  items: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: {
+                      lineNumber: { type: "integer", required: true },
+                      line: { type: "string", required: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
           numMatches: { type: "integer" },
           truncated: { type: "boolean", required: true },
         },
@@ -748,6 +846,7 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
         type: "text",
         text: value.content ?? (value.filenames.join("\n") || "No matches found"),
       }],
+      presentationMeta: (_args, value) => grepPresentationMeta(value),
     },
     isConcurrencySafe: () => true,
     /**
@@ -762,7 +861,11 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
       const workdir = await cwd(ctx, exec);
       const root = args.path ? resolve(workdir, args.path) : workdir;
       const mode = args.output_mode ?? "files_with_matches";
-      const argv = mode === "files_with_matches" ? ["--files-with-matches"] : mode === "count" ? ["--count"] : ["--line-number"];
+      const argv = mode === "files_with_matches"
+        ? ["--files-with-matches"]
+        : mode === "count"
+          ? ["--count"]
+          : ["--line-number", "--with-filename", "--null"];
       if (args["-i"]) argv.push("--ignore-case");
       if (args.glob) argv.push(`--glob=${args.glob}`);
       argv.push("--", args.pattern, root);
@@ -779,11 +882,23 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
       const limit = args.head_limit === 0 ? Number.MAX_SAFE_INTEGER : Math.max(1, Math.trunc(args.head_limit ?? SEARCH_LIMIT));
       const page = all.slice(offset, offset + limit);
       const paths = new Set<string>();
+      const cardFiles = new Map<string, { path: string; matches: Array<{ lineNumber: number; line: string }> }>();
       for (const line of page) {
-        const candidate = mode === "files_with_matches" ? line : line.split(":")[0]!;
+        const contentMatch = mode === "content" ? /^(.*)\0([1-9][0-9]*):(.*)$/u.exec(line) : null;
+        const candidate = mode === "files_with_matches" ? line : contentMatch?.[1];
+        if (candidate === undefined) continue;
         const canonical = isAbsolute(candidate) ? candidate : resolve(workdir, candidate);
         paths.add(canonical);
         noteTouch(touches, exec, canonical, displayPath(canonical, workdir), "grep");
+        if (contentMatch !== null) {
+          const path = displayPath(canonical, workdir);
+          let file = cardFiles.get(path);
+          if (file === undefined) {
+            file = { path, matches: [] };
+            cardFiles.set(path, file);
+          }
+          file.matches.push({ lineNumber: Number(contentMatch[2]), line: contentMatch[3]! });
+        }
       }
       const filenames = [...paths].map((path) => displayPath(path, workdir));
       return {
@@ -791,9 +906,10 @@ function registerSearchTools(ctx: Context, touches: ZCodeFileTouches): void {
         durationMs: Math.round(performance.now() - started),
         numFiles: filenames.length,
         filenames: mode === "files_with_matches" ? page.map((path) => displayPath(path, workdir)) : [],
-        ...(mode !== "files_with_matches" ? { content: page.join("\n") } : {}),
+        ...(mode !== "files_with_matches" ? { content: page.map((line) => line.replace("\0", ":")).join("\n") } : {}),
+        ...(mode === "content" ? { cardFiles: [...cardFiles.values()] } : {}),
         numMatches: all.length,
-        truncated: offset + page.length < all.length,
+        truncated: outcome.stdout.truncated || offset + page.length < all.length,
       };
     },
   }), { when: () => searchMode(ctx) === "tools" });

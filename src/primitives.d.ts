@@ -5,6 +5,125 @@
 declare module '@deepseek-ai/dsh-client-ui-primitives' {
   import type { ReactNode } from 'react'
 
+  export interface TerminalBlockLabels {
+    commandLine: (line: number) => string
+    signal: (signal: string) => string
+    exitCode: (code: number) => string
+    noExitCode: string
+    running: string
+    failed: string
+    done: string
+    copy: string
+    copied: string
+    noOutput: string
+    collapseAria: string
+    collapse: string
+    expandAria: (count: number) => string
+    expand: (count: number) => string
+  }
+  export interface CodeToolbarLabels {
+    codeLabel: string
+    wrapLabel: string
+    unwrapLabel: string
+  }
+  export interface DiffBlockLabels extends CodeToolbarLabels {
+    copy: string
+    copied: string
+    collapseAria: string
+    expandAria: (count: number) => string
+    collapse: string
+    expand: (count: number) => string
+  }
+  export interface ReadBlockLabels extends CodeToolbarLabels {
+    window: (shown: number, total: number) => string
+    copy: string
+    copied: string
+    collapseAria: string
+    expandAria: (count: number) => string
+    collapse: string
+    expand: (count: number) => string
+  }
+  export interface SearchBlockLabels {
+    pathsSummary: (shown: number, total: number, truncated: boolean) => string
+    matchesSummary: (shown: number, total: number, files: number, truncated: boolean) => string
+    copy: string
+    copied: string
+    noResults: string
+    collapseAria: string
+    expandAria: (count: number) => string
+    collapse: string
+    expand: (count: number) => string
+  }
+  export function DisclosureRow(props: {
+    rowClassName?: string
+    leadingClassName?: string
+    titleClassName?: string
+    icon: ReactNode
+    title: string
+    running: boolean
+    open: boolean
+    expandable: boolean
+    expandOnRowClick?: boolean
+    keepContentWhenOpen?: boolean
+    onToggle: () => void
+    collapsedContent?: ReactNode
+    children?: ReactNode
+  }): ReactNode
+  export function TerminalBlock(props: {
+    command: string
+    cwd?: string
+    output?: string
+    exitCode?: number | null
+    signal?: string
+    running: boolean
+    background?: boolean
+    labels: TerminalBlockLabels
+    maxLines?: number
+    className?: string
+  }): ReactNode
+  export function DiffBlock(props: {
+    diffs: readonly { path: string; oldText: string | null; newText: string }[]
+    labels: DiffBlockLabels
+    maxLines?: number
+    className?: string
+  }): ReactNode
+  export function ReadBlock(props: {
+    label: string
+    lines: readonly { number: number; text: string }[]
+    totalLines: number
+    lang?: string
+    labels: ReadBlockLabels
+    maxLines?: number
+    className?: string
+  }): ReactNode
+  export type SearchBlockProps = {
+    kind: 'paths'
+    paths: readonly string[]
+    truncated: boolean
+    total: number
+  } | {
+    kind: 'matches'
+    files: readonly {
+      path: string
+      matches: readonly { lineNumber: number; line: string }[]
+    }[]
+    truncated: boolean
+    total: number
+  }
+  export function SearchBlock(props: SearchBlockProps & {
+    labels: SearchBlockLabels
+    maxLines?: number
+    className?: string
+  }): ReactNode
+  export function diffTotals(
+    diffs: readonly { path: string; oldText: string | null; newText: string }[],
+  ): { added: number; removed: number }
+  export function IconApiOutlineRegular(props: { size?: number }): ReactNode
+  export function IconBrowseOutlineRegular(props: { size?: number }): ReactNode
+  export function IconEditOutlineRegular(props: { size?: number }): ReactNode
+  export function IconInspectOutlineRegular(props: { size?: number }): ReactNode
+  export function IconSearchOutlineRegular(props: { size?: number }): ReactNode
+
   /** Parsed field mutation staged for the next form save. */
   export type SettingsFieldWrite = { kind: 'set'; value: unknown } | { kind: 'clear' }
 

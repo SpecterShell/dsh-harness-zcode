@@ -28,9 +28,17 @@
           - &time-context
             id: time-context
             name: '@deepseek-ai/dsh-time-context'
-          - &zcode-tools
-            id: tools
-            name: '@spectershell/dsh-harness-zcode/tools'
+          - &zcode-files
+            id: zcode-files
+            name: cordis:group
+            group: true
+            isolate:
+              zcodeObservationPolicy: true
+            config:
+              - id: fs-observation-policy
+                name: '@spectershell/dsh-harness-zcode/observation'
+              - id: tools
+                name: '@spectershell/dsh-harness-zcode/tools'
           - id: surface
             name: '@spectershell/dsh-harness-zcode/surface'
             config:
@@ -80,7 +88,7 @@
         plugins:
           - *zcode-context
           - *time-context
-          - *zcode-tools
+          - *zcode-files
           - id: surface
             name: '@spectershell/dsh-harness-zcode/surface'
             config:
@@ -103,7 +111,7 @@
             name: '@deepseek-ai/dsh-time-context'
             config:
               complete: false
-          - *zcode-tools
+          - *zcode-files
           - id: surface
             name: '@spectershell/dsh-harness-zcode/surface'
             config:
@@ -123,7 +131,7 @@
         plugins:
           - *zcode-context
           - *time-context
-          - *zcode-tools
+          - *zcode-files
           - id: surface
             name: '@spectershell/dsh-harness-zcode/surface'
             config:

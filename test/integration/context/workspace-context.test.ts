@@ -78,11 +78,16 @@ async function preStep(host: HostValue, agent: HostValue): Promise<string> {
 }
 
 test('a resumed pre-step injects the persisted workspace context, not fresh text', async (t) => {
-  const { host, agent, workspace } = await setup(t)
+  const { host, session, agent, workspace } = await setup(t)
   await writeFile(join(workspace, 'AGENTS.md'), 'rule one: keep the changelog\n', 'utf8')
 
   const first = await preStep(host, agent)
   assert.match(first, /rule one/, 'the first pre-step did not inject the instruction')
+  const snapshotRecords = session
+    .snapshotEvents()
+    .filter((event: HostValue) => event.type === context.PROMPT_SNAPSHOT_EVENT)
+  assert.equal(snapshotRecords.length, 1, 'the first pre-step persisted no prompt snapshot record')
+  assert.equal(snapshotRecords[0].ignorable, true, 'the prompt snapshot record is not replay-safe')
 
   // The project document changes; a resumed step must keep the recorded text.
   await writeFile(join(workspace, 'AGENTS.md'), 'rule two: rewrite the changelog\n', 'utf8')

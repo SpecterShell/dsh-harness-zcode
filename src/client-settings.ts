@@ -22,16 +22,22 @@ import type {
   SettingsFormShell,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 
-/** Minimal slot registry contract used to contribute the bundle card. */
-interface SlotsLike {
-  inject(key: string, callback: () => () => void): () => void
-  register(options: {
-    name: string
-    key: string
-    label: () => string
-    locale: string
-    inject: () => unknown
-  }, factory: (props: CardProps) => unknown): () => void
+/** Small common surface of the browser Slots service used by this bundle. */
+export interface ClientSlotsLike {
+  inject(
+    key: string,
+    callback: () => void | (() => void) | Iterable<() => void>,
+  ): () => void
+  register(
+    options: {
+      name: string
+      key: string
+      locale: string
+      label?: () => string
+      inject?: (...args: never[]) => unknown
+    },
+    factory: (...args: never[]) => unknown,
+  ): () => void
 }
 
 /** Client config-form contract used to observe and mutate one served entry. */
@@ -43,7 +49,7 @@ interface ConfigFormsLike {
 /** Optional client services needed to mount the settings card. */
 export interface SettingsContext {
   effect: (setup: () => (() => void) | void, label: string) => unknown
-  slots?: SlotsLike
+  slots?: ClientSlotsLike
   configForms?: ConfigFormsLike
 }
 

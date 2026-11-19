@@ -43,7 +43,7 @@ Results recorded on 2026-11-19. Round 1 has task checks. The separate scored pil
 | --- | --- | --- |
 | Task checks | `setup.sh` then `git apply solution.patch` then `run-check.sh`, three tasks | PASS for each, and FAIL before the patch, recorded in [round-1/verification.md](round-1/verification.md) |
 | Live smoke | `eval/live-smoke/run-smoke.sh` | PASS: isolated profile composed, patch rows activated, scripted answer recorded, facts read (`provider=scripted`, 1 turn) |
-| Mounted proofs | `pnpm test` | 121 tests, 121 pass, typecheck clean. The script includes `test/pack/*.test.ts` |
+| Mounted proofs | `pnpm test` | 139 tests, 139 pass, typecheck clean. The script includes `test/pack/*.test.ts` |
 | Scored pilot | `eval/scored/runner.ts` plus the official harness | 3 SWE-bench Verified instances, 3 resolved, one attempt each except a disclosed pytest recovery. Details and limits in [scored/REPORT.md](scored/REPORT.md) |
 
 The `test` script uses explicit globs. Bare `node --test` reports four extra

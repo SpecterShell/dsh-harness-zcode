@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import { loadClientModule } from './fixtures/client-module.ts'
 
 interface VNode {
   type: unknown
@@ -62,8 +63,6 @@ function nodes(root: unknown): VNode[] {
 }
 
 async function loadClientSettings() {
-  const code = await readFile(new URL('../lib/client.js', import.meta.url), 'utf8')
-
   const edits: Array<[string, string]> = []
   const resets: string[] = []
   const requestedNamespaces: string[] = []
@@ -140,21 +139,12 @@ async function loadClientSettings() {
       getSnapshot: () => unknown,
     ) => getSnapshot(),
   }
-  let registration: {
-    factory: (require: (name: string) => unknown) => Record<string, unknown>
-  } | undefined
   const require = (name: string): unknown => {
     if (name === 'react') return react
     if (name === '@deepseek-ai/dsh-client-ui-primitives') return primitives
     throw new Error(`unexpected client dependency: ${name}`)
   }
-  Function('window', code)({
-    __ModuleLoader__: {
-      load: (next: typeof registration) => { registration = next },
-    },
-  })
-  assert.ok(registration)
-  const loaded = registration.factory(require)
+  const loaded = await loadClientModule(require)
 
   const mount = loaded.mountSettingsCard
   assert.equal(typeof mount, 'function')

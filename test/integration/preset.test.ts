@@ -4,7 +4,7 @@
  * implementations of every row.
  */
 import assert from 'node:assert/strict'
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -54,6 +54,7 @@ const hostRow = await import('../../src/host.ts')
 const contextRow = await import('../../src/context/index.ts')
 const toolsRow = await import('../../src/tools/index.ts')
 const surfaceRow = await import('../../src/surface.ts')
+const observationRow = await import('../../src/observation.ts')
 
 const ZCODE_TOOLS = ['Bash', 'Edit', 'Read', 'Write']
 const SEARCH_TOOLS = ['Glob', 'Grep']
@@ -86,6 +87,12 @@ function builtinRows(rows: PresetRow[], bindings: Map<string, string>): PresetRo
     assert.ok(builtin, `no real module is bound for preset row "${row.name}"`)
     return { ...row, name: `cordis:${builtin}` }
   })
+}
+
+function flattenedPlugins(rows: HostValue[]): HostValue[] {
+  return rows.flatMap(row => row.group === true
+    ? [row, ...flattenedPlugins(row.config as HostValue[])]
+    : [row])
 }
 
 function hostTool(name: string) {
@@ -124,7 +131,25 @@ await test('the patch declares the four exact ZCode preset identities and compos
     assert.ok(context?.group, `${id} has an isolated context group`)
     assert.ok(context.config.some((plugin: HostValue) => plugin.name === '@spectershell/dsh-harness-zcode/context'))
     assert.ok(context.config.some((plugin: HostValue) => plugin.name === '@deepseek-ai/dsh-command-compact'))
-    assert.ok(row.config.plugins.some((plugin: HostValue) => plugin.name === '@spectershell/dsh-harness-zcode/tools'))
+    const files = row.config.plugins.find((plugin: HostValue) => plugin.id === 'zcode-files')
+    assert.deepEqual(files?.isolate, { zcodeObservationPolicy: true }, `${id} isolates its private policy service`)
+    const plugins = flattenedPlugins(row.config.plugins)
+    const policyRows = plugins.filter(
+      (plugin: HostValue) => plugin.name === '@spectershell/dsh-harness-zcode/observation',
+    )
+    assert.equal(policyRows.length, 1, `${id} mounts one observation policy`)
+    assert.equal(
+      plugins.some((plugin: HostValue) => plugin.name === '@deepseek-ai/dsh-fs-observation-policy'),
+      false,
+      `${id} does not install the native event policy on the host bus`,
+    )
+    assert.ok(
+      plugins.indexOf(policyRows[0]) < plugins.findIndex(
+        (plugin: HostValue) => plugin.name === '@spectershell/dsh-harness-zcode/tools',
+      ),
+      `${id} mounts the observation policy before its filesystem tools`,
+    )
+    assert.ok(plugins.some((plugin: HostValue) => plugin.name === '@spectershell/dsh-harness-zcode/tools'))
     assert.ok(row.config.plugins.some((plugin: HostValue) => plugin.name === '@spectershell/dsh-harness-zcode/surface'))
   }
 
@@ -177,6 +202,7 @@ await test('the real registry mounts all scopes and enforces their inherited-too
     ['@spectershell/dsh-harness-zcode/context', 'zcode-context'],
     ['@spectershell/dsh-harness-zcode/tools', 'zcode-tools'],
     ['@spectershell/dsh-harness-zcode/surface', 'zcode-surface'],
+    ['@spectershell/dsh-harness-zcode/observation', 'zcode-observation-policy'],
     ['@deepseek-ai/dsh-time-context', 'time-context'],
     ['@deepseek-ai/dsh-skill-filesystem', 'skill-filesystem'],
     ['@deepseek-ai/dsh-tool-skill', 'tool-skill'],
@@ -195,6 +221,7 @@ await test('the real registry mounts all scopes and enforces their inherited-too
     ['zcode-context', contextRow],
     ['zcode-tools', toolsRow],
     ['zcode-surface', surfaceRow],
+    ['zcode-observation-policy', observationRow],
     ['time-context', timeContext],
     ['skill-filesystem', skillFilesystem],
     ['tool-skill', toolSkill],
@@ -309,6 +336,18 @@ await test('the real registry mounts all scopes and enforces their inherited-too
     }
   }
 
+  async function call(agent: HostValue, name: string, args: Record<string, unknown>) {
+    const definition = host.tools.get(name, scopeOf(agent.ctx))
+    assert.ok(definition, `${name} is registered in the selected preset scope`)
+    return await definition.execute(args, {
+      callId: `preset-${agent.id}-${name}`,
+      name,
+      arguments: args,
+      signal: new AbortController().signal,
+      agent,
+    })
+  }
+
   const strict = await createAgent('zcode-strict-agent')
   await presets.mount(strict.ctx, 'zcode-strict')
   assert.equal(host.commands.find(strict, 'compact')?.name, 'compact')
@@ -334,6 +373,33 @@ await test('the real registry mounts all scopes and enforces their inherited-too
   )
   assert.equal(host.tools.get('read', scopeOf(extended.ctx)), undefined)
   assert.equal(host.tools.get('bash', scopeOf(extended.ctx)), undefined)
+
+  const editTarget = join(root, 'zcode-edit.txt')
+  await writeFile(editTarget, 'alpha\nbeta\n')
+  await call(extended, 'Read', { file_path: editTarget })
+  await call(extended, 'Edit', { file_path: editTarget, old_string: 'beta', new_string: 'BETA' })
+  assert.equal(await readFile(editTarget, 'utf8'), 'alpha\nBETA\n')
+
+  const writeTarget = join(root, 'zcode-write.txt')
+  await writeFile(writeTarget, 'old\n')
+  await call(extended, 'Read', { file_path: writeTarget })
+  await call(extended, 'Write', { file_path: writeTarget, content: 'new\n' })
+  assert.equal(await readFile(writeTarget, 'utf8'), 'new\n')
+
+  const plain = await createAgent('plain-agent')
+  const rootTarget = await host.fs.resolve(writeTarget)
+  const rootFallback = { kind: 'root-fallback' }
+  const rootIntent = await plain.ctx.waterfall(
+    'fs/write-intent',
+    rootTarget,
+    { agent: plain },
+    () => rootFallback,
+  )
+  assert.equal(
+    rootIntent,
+    rootFallback,
+    'the preset-scoped policy does not change filesystem intent outside a ZCode composition',
+  )
 
   const creator = await createAgent('zcode-creator-agent')
   await presets.mount(creator.ctx, 'zcode-creator')

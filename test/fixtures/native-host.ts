@@ -1,5 +1,5 @@
 /**
- * The one place this repository finds the installed DeepSeek Harness.
+ * Native test helpers backed by the installed DeepSeek Harness.
  *
  * Tests must share Cordis, scope and session identities with the host that will
  * load this package, so they mount the host's public entry points from the
@@ -8,12 +8,14 @@
  * or reaches the network.
  */
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, realpath, rm } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
-import { dirname, isAbsolute, join } from 'node:path'
+import { dirname, join } from 'node:path'
 import type { TestContext } from 'node:test'
+import { installedHostAnchor } from './native-anchor.ts'
+
+export { HOST_VERSION } from './native-anchor.ts'
 
 /** A host-owned value (context, session, service, tool). */
 export type HostValue = any
@@ -32,53 +34,7 @@ export interface MountableContext {
   plugin(plugin: unknown, config?: unknown): HostFiber
 }
 
-/** The host version these proofs are written against. */
-export const HOST_VERSION = '0.2.2-rc.3'
-
-/**
- * Find the installed host manifest from the `dsh` command.
- *
- * `DSH_NATIVE_ANCHOR` wins, so a CI image can point at a checkout or a packed
- * install without a `dsh` on `PATH`. A pnpm shim records the exact entry it
- * launches as `cmd-shim-target=<dir>/lib/bin.js`; an npm global install
- * exposes `dsh` as a symlink, so the manifest is found by resolving the link
- * and walking up to the owning `package.json`.
- */
-async function installedAnchor(): Promise<string | undefined> {
-  const explicit = process.env.DSH_NATIVE_ANCHOR
-  if (explicit !== undefined && explicit !== '') return explicit
-  try {
-    const executable = execFileSync('which', ['dsh'], { encoding: 'utf8' }).trim()
-    const shim = await readFile(executable, 'utf8')
-    const target = /cmd-shim-target=(\S+)\/lib\/bin\.js/.exec(shim)?.[1]
-    if (target !== undefined) return join(target, 'package.json')
-
-    for (let directory = dirname(await realpath(executable)); ; directory = dirname(directory)) {
-      const manifest = join(directory, 'package.json')
-      try {
-        const parsed = JSON.parse(await readFile(manifest, 'utf8')) as { name?: unknown }
-        if (parsed.name === '@deepseek-ai/dsh') return manifest
-      } catch {
-        // Not this directory's manifest; keep walking toward the install root.
-      }
-      if (dirname(directory) === directory) return undefined
-    }
-  } catch {
-    return undefined
-  }
-}
-
-const anchor = await installedAnchor()
-assert.ok(anchor !== undefined, 'no installed host found: put `dsh` on PATH or set DSH_NATIVE_ANCHOR to its package.json')
-assert.ok(isAbsolute(anchor), 'DSH_NATIVE_ANCHOR must be an absolute path to the installed @deepseek-ai/dsh/package.json')
-const hostManifest = JSON.parse(await readFile(anchor, 'utf8')) as { name?: unknown; version?: unknown }
-assert.equal(hostManifest.name, '@deepseek-ai/dsh', 'DSH_NATIVE_ANCHOR must name the @deepseek-ai/dsh manifest')
-assert.equal(
-  hostManifest.version,
-  HOST_VERSION,
-  `these proofs are written against host ${HOST_VERSION}; the installed host is ${String(hostManifest.version)}`,
-)
-
+const anchor = installedHostAnchor()
 const require = createRequire(anchor)
 
 /**

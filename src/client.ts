@@ -4,9 +4,11 @@
  */
 import { mountSettingsCard } from './client-settings.js'
 import type { SettingsContext } from './client-settings.js'
+import { mountToolviews } from './client-toolviews.js'
 import { locales } from './locales.ts'
 
 export { mountSettingsCard }
+export { mountToolviews, ZCodeToolview } from './client-toolviews.js'
 export { locales }
 
 /** Client context required by the installed ZCode browser entry. */
@@ -27,6 +29,7 @@ export function apply(ctx: ClientContext): void {
     '@spectershell/dsh-harness-zcode: locales',
   )
   mountSettingsCard(ctx, ctx.locale.bind('@spectershell/dsh-harness-zcode'))
+  mountToolviews(ctx)
 }
 
 /** Required client services declared to the Cordis loader. */

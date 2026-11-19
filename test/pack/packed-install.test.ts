@@ -130,11 +130,15 @@ await test('the packed artifact publishes every export and loads with its declar
       assert.ok(declared.has(packageName), `lib/${file} imports undeclared package ${packageName}`)
     }
   }
-  const clientFile = libFiles.find(name => name.startsWith('client'))
-  if (clientFile !== undefined) {
-    const client = await readFile(join(pkg, 'lib', clientFile), 'utf8')
-    assert.match(client, /window\.__ModuleLoader__\.load/u, 'the client entry is a web-host bundle')
-  }
+  // tsc also emits browser helper modules under lib/client-*.js; the web host
+  // entry is exactly the tsdown bundle declared by the ./client export.
+  const clientFile = libFiles.find(name => name === 'client.js')
+  assert.equal(clientFile, 'client.js', 'the build emitted the web-host client bundle')
+  const declaredClient = manifest.exports['./client']
+  const declaredClientFile = typeof declaredClient === 'string' ? declaredClient : declaredClient?.default
+  assert.equal(declaredClientFile, './lib/client.js', 'the ./client export names the web-host bundle')
+  const client = await readFile(join(pkg, 'lib', clientFile), 'utf8')
+  assert.match(client, /window\.__ModuleLoader__\.load/u, 'the client entry is a web-host bundle')
 
   // Stand in for a profile: the extracted package next to the declared
   // dependencies and peers, which are the ones already installed here.

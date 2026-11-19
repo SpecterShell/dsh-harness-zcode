@@ -5,32 +5,28 @@
  */
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { Session, SessionId } from '@deepseek-ai/dsh-session'
 import { assembleSections, snapshotOf, snapshotSections } from '../../src/context/prompt.ts'
 import {
   clearPromptSnapshot,
   copyPromptSnapshot,
   getPromptSnapshot,
   persistPromptSnapshot,
+  PROMPT_SNAPSHOT_EVENT,
   replayPromptSnapshot,
 } from '../../src/context/snapshots.ts'
 import type { PromptSection } from '../../src/context/types.ts'
+
+let nextSession = 0
 
 function section(name: string, order: number, text: string): PromptSection {
   return { name, text, order, cacheHint: 'stable' }
 }
 
-/** A session stand-in that records events, like the host session does. */
+/** An independent host session that accepts plugin records without store lifecycle setup. */
 function fakeSession() {
-  const events: Array<{ type: string; data: unknown }> = []
-  return {
-    events,
-    append(type: string, data: unknown) {
-      events.push({ type, data })
-    },
-    snapshotEvents() {
-      return events
-    },
-  }
+  nextSession += 1
+  return Session.create(SessionId(`snapshot-test-${nextSession}`))
 }
 
 test('a complete persona replaces every assembled section', () => {
@@ -69,10 +65,10 @@ test('the fingerprint is stable for identical sections and changes with content'
 test('a persisted snapshot wins over current sections and is immutable', () => {
   const scope = fakeSession()
   const stored = persistPromptSnapshot(scope, snapshotOf([section('persona', 100, 'old')]))
-  assert.equal(getPromptSnapshot(scope), stored)
+  assert.deepEqual(getPromptSnapshot(scope), stored)
 
   const second = persistPromptSnapshot(scope, snapshotOf([section('persona', 100, 'new')]))
-  assert.equal(second, stored, 'a second persist for the same model keeps the first snapshot')
+  assert.deepEqual(second, stored, 'a second persist for the same model keeps the first snapshot')
 
   const current = [section('persona', 100, 'new')]
   assert.deepEqual(
@@ -87,9 +83,36 @@ test('a snapshot survives a session reload by replaying the recorded event', () 
   const stored = persistPromptSnapshot(original, snapshotOf([section('persona', 100, 'kept')]))
 
   // A reloaded session has the same event log and a fresh object identity.
-  const reloaded = { snapshotEvents: () => original.events }
-  assert.equal(getPromptSnapshot(reloaded), stored)
+  const reloaded = { snapshotEvents: () => original.snapshotEvents() }
+  assert.deepEqual(getPromptSnapshot(reloaded), stored)
   assert.equal(replayPromptSnapshot(reloaded)?.snapshotFingerprint, stored.snapshotFingerprint)
+})
+
+test('snapshot persistence uses an ignorable namespaced plugin record', () => {
+  const session = fakeSession()
+  persistPromptSnapshot(session, snapshotOf([section('persona', 100, 'kept')]))
+  const event = session.ownEvents()[0] as unknown as { type?: string; ignorable?: boolean }
+  assert.equal(event?.type, PROMPT_SNAPSHOT_EVENT)
+  assert.equal(event?.ignorable, true)
+})
+
+test('a host session can replay the namespaced snapshot record', () => {
+  const original = fakeSession()
+  const stored = persistPromptSnapshot(original, snapshotOf([section('persona', 100, 'kept')]))
+  nextSession += 1
+  const replayed = Session.create(
+    SessionId(`snapshot-test-${nextSession}`),
+    original.snapshotEvents(),
+  )
+  assert.deepEqual(replayPromptSnapshot(replayed), stored)
+})
+
+test('legacy snapshot events remain readable when already available', () => {
+  const stored = snapshotOf([section('persona', 100, 'legacy')])
+  const legacy = {
+    snapshotEvents: () => [{ type: 'zcode/prompt-snapshot', data: { snapshot: stored } }],
+  }
+  assert.equal(replayPromptSnapshot(legacy), stored)
 })
 
 test('a different model replaces the snapshot', () => {
@@ -111,10 +134,10 @@ test('a successful compaction clears the snapshot and a fork copies it', () => {
   const child = fakeSession()
   const stored = persistPromptSnapshot(parent, snapshotOf([section('persona', 100, 'parent')]))
   copyPromptSnapshot(parent, child)
-  assert.equal(getPromptSnapshot(child), stored)
+  assert.deepEqual(getPromptSnapshot(child), stored)
 
   clearPromptSnapshot(parent)
   assert.equal(getPromptSnapshot(parent), undefined)
-  assert.equal(getPromptSnapshot(child), stored, 'the child keeps its own copy')
-  assert.equal(getPromptSnapshot({ snapshotEvents: () => parent.events }), undefined)
+  assert.deepEqual(getPromptSnapshot(child), stored, 'the child keeps its own copy')
+  assert.equal(getPromptSnapshot({ snapshotEvents: () => parent.snapshotEvents() }), undefined)
 })

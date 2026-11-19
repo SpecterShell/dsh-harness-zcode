@@ -1,19 +1,35 @@
 /** Stores prompt snapshots in session events with a process-local cache for live scopes. */
 
+import {
+  appendPluginRecord,
+  pluginRecordOf,
+  Session,
+  type SessionEvent,
+} from "@deepseek-ai/dsh-session";
+
 import type { PromptSnapshot } from "./types.ts";
 
-export const PROMPT_SNAPSHOT_EVENT = "zcode/prompt-snapshot";
+export const PROMPT_SNAPSHOT_EVENT =
+  "plugin:spectershell/dsh-harness-zcode/prompt-snapshot";
+const LEGACY_PROMPT_SNAPSHOT_EVENT = "zcode/prompt-snapshot";
+
+interface PromptSnapshotRecord {
+  readonly snapshot?: PromptSnapshot;
+  readonly cleared?: boolean;
+}
+
+declare module "@deepseek-ai/dsh-session" {
+  interface PluginRecordMap {
+    "plugin:spectershell/dsh-harness-zcode/prompt-snapshot": PromptSnapshotRecord;
+  }
+}
 
 interface SnapshotEvent {
   readonly type?: string;
-  readonly data?: {
-    readonly snapshot?: PromptSnapshot;
-    readonly cleared?: boolean;
-  };
+  readonly data?: unknown;
 }
 
 interface SnapshotSession {
-  append?(type: string, data: unknown): unknown;
   ownEvents?(): Iterable<SnapshotEvent>;
   snapshotEvents?(): Iterable<SnapshotEvent>;
 }
@@ -46,7 +62,7 @@ export function persistPromptSnapshot(scope: object, snapshot: PromptSnapshot): 
     snapshots.set(session, existing);
     return existing;
   }
-  session.append?.(PROMPT_SNAPSHOT_EVENT, { snapshot });
+  appendPluginRecord(session as unknown as Session, PROMPT_SNAPSHOT_EVENT, { snapshot });
   snapshots.set(scope, snapshot);
   snapshots.set(session, snapshot);
   return snapshot;
@@ -59,7 +75,7 @@ export function persistPromptSnapshot(scope: object, snapshot: PromptSnapshot): 
 export function clearPromptSnapshot(scope: object): boolean {
   const session = sessionOf(scope);
   const existed = getPromptSnapshot(scope) !== undefined;
-  session.append?.(PROMPT_SNAPSHOT_EVENT, { cleared: true });
+  appendPluginRecord(session as unknown as Session, PROMPT_SNAPSHOT_EVENT, { cleared: true });
   snapshots.delete(scope);
   snapshots.delete(session);
   return existed;
@@ -86,11 +102,49 @@ export function replayPromptSnapshot(session: object): PromptSnapshot | undefine
   if (!events) return undefined;
   let snapshot: PromptSnapshot | undefined;
   for (const event of events) {
-    if (event.type !== PROMPT_SNAPSHOT_EVENT) continue;
-    if (event.data?.cleared) snapshot = undefined;
-    else if (event.data?.snapshot) snapshot = event.data.snapshot;
+    const data = promptSnapshotRecordOf(event);
+    if (!data) continue;
+    if (data.cleared) snapshot = undefined;
+    else if (data.snapshot) snapshot = data.snapshot;
   }
   return snapshot;
+}
+
+function promptSnapshotRecordOf(event: SnapshotEvent): PromptSnapshotRecord | undefined {
+  const data =
+    event.type === LEGACY_PROMPT_SNAPSHOT_EVENT
+      ? event.data
+      : pluginRecordOf(event as SessionEvent)?.type === PROMPT_SNAPSHOT_EVENT
+        ? event.data
+        : undefined;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return undefined;
+  const record = data as PromptSnapshotRecord;
+  if (record.cleared === true) return { cleared: true };
+  return isPromptSnapshot(record.snapshot) ? { snapshot: record.snapshot } : undefined;
+}
+
+function isPromptSnapshot(value: unknown): value is PromptSnapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const snapshot = value as Partial<PromptSnapshot>;
+  if (typeof snapshot.snapshotFingerprint !== "string" || !Array.isArray(snapshot.sections)) {
+    return false;
+  }
+  if (
+    snapshot.model !== undefined &&
+    (typeof snapshot.model.provider !== "string" || typeof snapshot.model.model !== "string")
+  ) {
+    return false;
+  }
+  return snapshot.sections.every(
+    (section) =>
+      section !== null &&
+      typeof section === "object" &&
+      typeof section.name === "string" &&
+      typeof section.text === "string" &&
+      typeof section.order === "number" &&
+      (section.cacheHint === "stable" || section.cacheHint === "dynamic") &&
+      (section.complete === undefined || typeof section.complete === "boolean"),
+  );
 }
 
 function sessionOf(scope: object): object & SnapshotSession {

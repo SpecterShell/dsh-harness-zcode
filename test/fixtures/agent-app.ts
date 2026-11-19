@@ -80,6 +80,7 @@ export async function agentApp(t: TestContext, buildScript: (workspace: string) 
   const contextRow = await import('../../src/context/index.ts')
   const toolsRow = await import('../../src/tools/index.ts')
   const surfaceRow = await import('../../src/surface.ts')
+  const observationRow = await import('../../src/observation.ts')
 
   const host = new Context()
   t.after(() => host.fiber.dispose())
@@ -97,6 +98,7 @@ export async function agentApp(t: TestContext, buildScript: (workspace: string) 
     ['zcode-tools', toolsRow],
     ['zcode-surface', surfaceRow],
     ['time-context', timeContext],
+    ['zcode-observation-policy', observationRow],
     ['command-compact', commandCompact],
     ['skill-filesystem', skillFilesystem],
     ['tool-skill', toolSkill],
@@ -149,6 +151,9 @@ export async function agentApp(t: TestContext, buildScript: (workspace: string) 
     if (name === '@spectershell/dsh-harness-zcode/tools') return { ...row, name: 'cordis:zcode-tools' }
     if (name === '@spectershell/dsh-harness-zcode/surface') return { ...row, name: 'cordis:zcode-surface' }
     if (name === '@deepseek-ai/dsh-time-context') return { ...row, name: 'cordis:time-context' }
+    if (name === '@spectershell/dsh-harness-zcode/observation') {
+      return { ...row, name: 'cordis:zcode-observation-policy' }
+    }
     if (name === '@deepseek-ai/dsh-command-compact') return { ...row, name: 'cordis:command-compact' }
     if (name === '@deepseek-ai/dsh-skill-filesystem') return { ...row, name: 'cordis:skill-filesystem' }
     if (name === '@deepseek-ai/dsh-tool-skill') return { ...row, name: 'cordis:tool-skill' }
