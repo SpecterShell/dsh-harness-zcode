@@ -24,7 +24,7 @@ await test('Bash cannot write a protected file under a read-only sandbox', async
 
   const result = await call('Bash', { command: `printf altered > ${JSON.stringify(protectedFile)}` })
   assert.equal(await readFile(protectedFile, 'utf8'), 'original', 'the sandbox kept the protected file intact')
-  assert.match(result.stderr, /read-only|denied|permission/iu, `the denial reaches the model, got ${JSON.stringify(result)}`)
+  assert.match(result.stderr, /read-only|denied|permission|operation not permitted/iu, `the denial reaches the model, got ${JSON.stringify(result)}`)
   assert.equal(result.stdout, '', 'the write produced no output')
   assert.equal(result.status, 'failed', 'a denied file operation fails the call even when the shell exits 0')
 })
