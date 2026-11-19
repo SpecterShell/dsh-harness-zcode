@@ -18,9 +18,28 @@ env:
   NODE_VERSION: '24'
 
 jobs:
+  source:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.source.outputs.tag }}
+    steps:
+      - id: source
+        shell: bash
+        run: |
+          # A signed vX.Y.Z+retry.N tag carries CI fixes for an immutable release tag.
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            tag="$GITHUB_REF_NAME"
+            if [[ "$tag" =~ ^(v[0-9]+\.[0-9]+\.[0-9]+)\+retry\.[0-9]+$ ]]; then
+              tag="${BASH_REMATCH[1]}"
+            fi
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          fi
+
   check-and-package:
+    needs: source
     uses: ./.github/workflows/ci.yml
     with:
+      source-tag: ${{ needs.source.outputs.tag }}
       upload-artifact: true
 
   attest:
@@ -83,7 +102,7 @@ jobs:
 
   release:
     name: Create the GitHub Release
-    needs: [check-and-package, attest, publish]
+    needs: [source, check-and-package, attest, publish]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -100,16 +119,17 @@ jobs:
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.source.outputs.tag }}
         run: |
           archive=$(ls ./*.tgz)
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_TAG#v}"
           mv "$archive" "dsh-harness-zcode-${version}.tgz"
           extra=(--verify-tag --generate-notes)
           if [[ "$version" == *-* ]]; then
             extra+=(--prerelease)
           fi
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "dsh-harness-zcode-${version}.tgz" --clobber
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "dsh-harness-zcode-${version}.tgz" --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "dsh-harness-zcode-${version}.tgz" "${extra[@]}"
+            gh release create "$RELEASE_TAG" "dsh-harness-zcode-${version}.tgz" "${extra[@]}"
           fi

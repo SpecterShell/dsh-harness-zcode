@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
+      source-tag:
+        description: Existing release tag to test and package
+        type: string
       upload-artifact:
         description: Upload the validated package archive
         type: boolean
@@ -28,6 +31,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.source-tag || github.sha }}
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -85,10 +89,12 @@ jobs:
             assert(files.has('package/' + entry.replace(/^\.\//, '')), 'Missing entry point: ' + entry)
           }
           if (process.env.GITHUB_REF_TYPE === 'tag') {
-            assert.equal(process.env.GITHUB_REF_NAME, 'v' + manifest.version, 'Tag must match the package version')
+            assert.equal(process.env.SOURCE_TAG, 'v' + manifest.version, 'Tag must match the package version')
           }
           console.log(`Validated ${archive} (${files.size} files)`)
           NODE
+        env:
+          SOURCE_TAG: ${{ inputs.source-tag || github.ref_name }}
       - name: Upload the package artifact
         if: ${{ inputs.upload-artifact }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -106,6 +112,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.source-tag || github.sha }}
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -131,4 +138,5 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.source-tag || github.sha }}
       - run: node .github/scripts/check-markdown-links.mjs
