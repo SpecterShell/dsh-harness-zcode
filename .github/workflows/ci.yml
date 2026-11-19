@@ -48,8 +48,8 @@ jobs:
           anchor="$(npm root -g)/@deepseek-ai/dsh/package.json"
           test -f "$anchor"
           echo "DSH_NATIVE_ANCHOR=$anchor" >> "$GITHUB_ENV"
-      - name: Install bubblewrap
-        run: sudo apt-get update && sudo apt-get install --yes bubblewrap
+      - name: Install sandbox and search dependencies
+        run: sudo apt-get update && sudo apt-get install --yes bubblewrap ripgrep
       - name: Test
         run: pnpm test
       - name: Pack and validate the archive
@@ -113,6 +113,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm build
+      - name: Install ripgrep for the search tools
+        run: command -v rg || brew install ripgrep
       - name: Install the DSH host
         run: npm install --global "@deepseek-ai/dsh@${DSH_VERSION}"
       - name: Test

@@ -428,6 +428,7 @@ await test('Glob metadata reports the capped page and the truthful pre-page tota
 
   const input = { pattern: '*.txt' }
   const found = await scope.call('Glob', input)
+  assert.equal(found.isError, false, found.content[0]?.text)
   assert.equal(found.value.totalFiles, 105)
   assert.equal(found.value.filenames.length, 100)
   assert.deepEqual(found.meta, {
@@ -456,6 +457,7 @@ await test('Grep metadata groups the rendered page and keeps totals and truncati
   await writeFile(join(scope.workspace, 'd.txt'), 'hay\n')
 
   const paths = await scope.call('Grep', { pattern: 'needle', output_mode: 'files_with_matches' })
+  assert.equal(paths.isError, false, paths.content[0]?.text)
   assert.deepEqual({
     ...paths.meta,
     files: [...paths.meta.files].sort((left: any, right: any) => left.path.localeCompare(right.path)),
@@ -522,6 +524,7 @@ await test('Grep metadata is bounded while the model-facing page is untouched', 
   await writeFile(file, Array.from({ length: 120 }, (_, index) => `needle-${index}-${'x'.repeat(600)}`).join('\n'))
 
   const found = await scope.call('Grep', { pattern: 'needle', output_mode: 'content' })
+  assert.equal(found.isError, false, found.content[0]?.text)
   assert.equal(found.value.numMatches, 120)
   assert.equal(found.meta.total, 120)
   assert.equal(found.meta.truncated, true, 'dropping card entries is reported as truncation')
